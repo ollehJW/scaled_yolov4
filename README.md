@@ -43,7 +43,13 @@ Testing on torch.float64:
  mish_pt_bwd:   4.897ms ± 1.312µs (4.893ms - 4.901ms)
  mish_cuda_fwd: 8.989ms ± 3.646µs (8.980ms - 9.007ms)
  mish_cuda_bwd: 10.92ms ± 3.966µs (10.91ms - 10.93ms)
- ```
+```
 (Collected with `test/perftest.py -b`)
 
 Note that double precision performance is very low. Some optimisation might be possible but this does not seem to be a common usage so is not a priority. Raise an issue if you have a use-case for it.
+
+
+
+修改了下在自己Win10 cuda10.1 pytorch1.6 可以python setup.py install 安装
+
+python setup.py install
