@@ -48,8 +48,8 @@ Testing on torch.float64:
 
 Note that double precision performance is very low. Some optimisation might be possible but this does not seem to be a common usage so is not a priority. Raise an issue if you have a use-case for it.
 
-
-
-修改了下在自己Win10 cuda10.1 pytorch1.6 可以python setup.py install 安装
-
-python setup.py install
+## Update
+Win10 cuda10.1 pytorch1.6 环境下使用python setup.py build install 安装
+```bash
+python setup.py build install
+```
