@@ -1,55 +1,28 @@
-# Mish-Cuda: Self Regularized Non-Monotonic Activation Function
-
-This is a PyTorch CUDA implementation of the Mish activation by Diganta Misra (https://github.com/digantamisra98/).
-
-## Installation
-It is currently distributed as a source only PyTorch extension. So you need a propely set up toolchain and CUDA compilers to install.
-1) _Toolchain_ - In conda the `cxx_linux-64` package provides an appropriate toolchain. However there can still be compatbility issues with this depending on system. You can also try with the system toolchian.
-2) _CUDA Toolkit_ - The [nVidia CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit) is required in addition to drivers to provide needed headers and tools. Get the appropriate version for your Linux distro from nVidia or check for distro specific instructions otherwise.
-
-_It is important your CUDA Toolkit matches the version PyTorch is built for or errors can occur. Currently PyTorch builds for v10.0 and v9.2._
-
-## Performance
-The CUDA implementation seems to mirror the learning perfomance of the original implementation and no stability issues have been observed. In terms of speed of the function it is fairly comparable with other PyTorch activation functions and significantly faster than the pure PyTorch implementation:
-```
-Profiling over 100 runs after 10 warmup runs.
-Profiling on GeForce RTX 2070
-Testing on torch.float16:
- relu_fwd:      223.7µs ± 1.026µs (221.6µs - 229.2µs)
- relu_bwd:      312.1µs ± 2.308µs (307.8µs - 317.4µs)
- softplus_fwd:  342.2µs ± 38.08µs (282.4µs - 370.6µs)
- softplus_bwd:  488.5µs ± 53.75µs (406.0µs - 528.4µs)
- mish_pt_fwd:   658.8µs ± 1.467µs (655.9µs - 661.9µs)
- mish_pt_bwd:   1.135ms ± 4.785µs (1.127ms - 1.145ms)
- mish_cuda_fwd: 267.3µs ± 1.852µs (264.5µs - 274.2µs)
- mish_cuda_bwd: 345.6µs ± 1.875µs (341.9µs - 349.8µs)
-
-Testing on torch.float32:
- relu_fwd:      234.2µs ± 621.8ns (233.2µs - 235.7µs)
- relu_bwd:      419.3µs ± 1.238µs (417.8µs - 426.0µs)
- softplus_fwd:  255.1µs ± 753.6ns (252.4µs - 256.5µs)
- softplus_bwd:  420.2µs ± 631.4ns (418.2µs - 421.9µs)
- mish_pt_fwd:   797.4µs ± 1.094µs (795.4µs - 802.8µs)
- mish_pt_bwd:   1.689ms ± 1.222µs (1.686ms - 1.696ms)
- mish_cuda_fwd: 282.9µs ± 876.1ns (281.1µs - 287.8µs)
- mish_cuda_bwd: 496.3µs ± 1.781µs (493.6µs - 503.0µs)
-
-Testing on torch.float64:
- relu_fwd:      450.4µs ± 879.7ns (448.8µs - 456.4µs)
- relu_bwd:      834.2µs ± 925.8ns (832.3µs - 838.8µs)
- softplus_fwd:  6.370ms ± 2.348µs (6.362ms - 6.375ms)
- softplus_bwd:  2.359ms ± 1.276µs (2.356ms - 2.365ms)
- mish_pt_fwd:   10.11ms ± 2.806µs (10.10ms - 10.12ms)
- mish_pt_bwd:   4.897ms ± 1.312µs (4.893ms - 4.901ms)
- mish_cuda_fwd: 8.989ms ± 3.646µs (8.980ms - 9.007ms)
- mish_cuda_bwd: 10.92ms ± 3.966µs (10.91ms - 10.93ms)
-```
-(Collected with `test/perftest.py -b`)
-
-Note that double precision performance is very low. Some optimisation might be possible but this does not seem to be a common usage so is not a priority. Raise an issue if you have a use-case for it.
-
-## Update
-Win10 cuda10.1 pytorch1.6 环境下使用python setup.py build install 安装
-```bash
+## 환경설정
+requirements.txt 참고
+conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=11.0 -c pytorch
+추가로 mish-cuda 설치 필요
+cd mish-cuda
 python setup.py build install
-```
+
+## 사용법
+
+### 1. 데이터 셋 준비
+our_data 폴더안에 train 폴더를 만들고, 그 안에 images 폴더와 labels 폴더를 만들자.
+예시에는 VOTT로 annotation을 만들고 preprocessing.py로 yolov4 포맷으로 변경했음. 
+labels 폴더내의 txt형식으로 만들어주면 될것으로 예상됨.
+
+### 2. 여러 파라미터 수정
+(1) data 폴더 내 coco.names의 class 이름, coco.yaml에서 데이터셋 경로 및 class 개수 및 이름 수정
+
+(2) models 롣어 내 yolov4-csp.cfg 파일을 수정해주어야 함. (filters를 (class수 + 5)*3 로 변경 및 제일 아래 class 수를 변경)
+
+### 3. 명령어 정리
+(1) train
+python train.py --device 0 --batch-size 8 --data data/coco.yaml  --cfg models/yolov4-csp.cfg --weights ''
+
+(2) test
+python test.py --img 640 --conf 0.45 --iou 0.4 --batch 1 --device 0 --data data/coco.yaml --cfg models/yolov4-csp.cfg --weights /home/jongwook95.lee/vision/Slive/ScaledYOLOv4-yolov4-csp/runs/exp7/weights/best.pt
+
+(3) detect (영상)
+python detect.py --conf-thres 0.4 --device 0 --weights /home/jongwook95.lee/vision/Slive/ScaledYOLOv4-yolov4-csp/runs/exp7/weights/best.pt --source /home/jongwook95.lee/vision/Slive/ScaledYOLOv4-yolov4-csp/our_data/closeshot_3.MOV --img-size 896 --cfg models/yolov4-csp.cfg
