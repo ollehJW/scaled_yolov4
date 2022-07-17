@@ -6,6 +6,11 @@
 lr0: 0.01  # initial learning rate (SGD=1E-2, Adam=1E-3)
 momentum: 0.937  # SGD momentum/Adam beta1
 weight_decay: 0.0005  # optimizer weight decay 5e-4
+img_width: 640 # Image width to resize
+img_height: 640 # Image height to resize
+img_channels: 3  # Image channel
+epochs: 300 # Train epochs
+batch_size: 8 # Train batch size
 giou: 0.05  # GIoU loss gain
 cls: 0.5  # cls loss gain
 cls_pw: 1.0  # cls BCELoss positive_weight
